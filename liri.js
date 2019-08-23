@@ -2,6 +2,7 @@ var keys = require('./utils/keys')
 var axios = require('axios');
 var Logger = require('./utils/logger')
 var moment = require('moment')
+var Spotify = require('node-spotify-api');
 
 var search = {
     command: "",
@@ -14,14 +15,8 @@ var logger = new Logger("LIRI BOT")
 
 var log = logger.log.bind(logger)
 
-
-var Spotify = function (keys) {
-    this.id = keys.id
-    this.secret = keys.secret
-}
-
 var searchConcert = function (searchTerm) {
-    log("SEARCHING FOR CONCERTS", "info")
+    log("SEARCHING FOR CONCERTS \n", "info")
     axios({
         method: "GET",
         url: `https://rest.bandsintown.com/artists/${searchTerm}/events?app_id=codingbootcamp`
@@ -57,7 +52,29 @@ var searchConcert = function (searchTerm) {
 
 }
 
-var searchSpotify
+var searchSpotify = function (searchTerm) {
+    var displayArray = []
+    spotify.search(
+        {
+            type: 'track',
+            query: searchTerm
+        }
+        , function (err, data) {
+            if (err) {
+                return log(`Looks like we encountered an error: ${err}`);
+            }
+
+            data.tracks.items.forEach(function (trackitem) {
+                log(`ARTIST       : ${trackitem.artists[0].name}`, 'success', false)
+                log(`SONG NAME    : ${trackitem.name}`, 'success', false)
+                log(`ALBUM NAME   : ${trackitem.album.name}`, 'success', false)
+                log(`PREVIEW LINK : ${trackitem.preview_url}`, 'success', false)
+                log('===========================================================================================================================\n', 'default', false)
+
+            })
+
+        });
+}
 
 
 var spotify = new Spotify(keys.spotify);
