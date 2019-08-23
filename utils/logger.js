@@ -10,7 +10,6 @@ class Logger {
             info: "\x1b[35m",
             warn: "\x1b[33m"
         }
-        this.tid = ""
     }
 
     setTid(thread_id) {
@@ -19,9 +18,9 @@ class Logger {
     log(text, color = "default", timeStamp = true) {
         var prefix = ""
         var logcolor = ""
-        timeStamp ? prefix = `[${dateFns.format(new Date(), 'HH:mm:ss.ms')}] [${this.prefix}]  [${this.tid}]` : prefix = `[${this.prefix}] [${this.tid}]`
+        timeStamp ? prefix = `[${dateFns.format(new Date(), 'HH:mm:ss.ms')}] [${this.prefix}] : ` : prefix = ""
         logcolor = this.status[color]
-        console.log(logcolor, `${prefix} : ${text}`);
+        console.log(logcolor, `${prefix}${text}`);
     }
 }
 
