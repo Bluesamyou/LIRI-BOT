@@ -16,6 +16,16 @@ var logger = new Logger("LIRI BOT")
 
 var log = logger.log.bind(logger)
 
+var writeFile = function (text) {
+    fs.appendFile('./utils/log.txt', text + "\n", function (err) {
+
+        if (err) {
+            return log("Unable to write to log file", 'fail')
+        }
+
+    })
+}
+
 var searchConcert = function (searchTerm) {
     log("SEARCHING FOR CONCERTS \n", "info")
     axios({
@@ -39,6 +49,11 @@ var searchConcert = function (searchTerm) {
 
                 })
             })
+
+            showsArray.forEach(function (show) {
+                writeFile(JSON.stringify(show, null, 4))
+            })
+
             console.table(showsArray)
 
 
@@ -76,6 +91,12 @@ var searchSpotify = function (searchTerm) {
                 log(`PREVIEW LINK : ${trackitem.preview_url}`, 'success', false)
                 log('===========================================================================================================================\n', 'default', false)
 
+                writeFile(JSON.stringify({
+                    "Artist": trackitem.artists[0].name,
+                    "Song Name": trackitem.name,
+                    "Album Name": trackitem.album.name,
+                    "Preview Link": trackitem.preview_url
+                }, null, 4))
             })
 
         });
@@ -105,6 +126,15 @@ var movieSearch = function (searchTerm) {
             log(`PLOT                   : ${response.data['Plot']}`, 'success', false)
             log(`ACTORS                 : ${response.data['Actors']}`, 'success', false)
 
+            writeFile(JSON.stringify({
+                "title": response.data['Title'],
+                "Year": response.data['Year'],
+                "Rating": response.data['imdbRating'],
+                "Rotten Tomatoes Rating": rottenTomatoesScore,
+                "Country": response.data['Country'],
+                "Plot": response.data['Plot'],
+                "Actors": response.data['Actors']
+            }, null, 4))
 
         })
         .catch(function (err) {
@@ -125,6 +155,8 @@ process.argv.splice(2).forEach(function (inputString, index) {
     }
 })
 
+writeFile(search.command + " " + search.searchString)
+
 if (search.command === "concert-this") {
     searchConcert(search.searchString);
 }
@@ -135,11 +167,11 @@ else if (search.command === "movie-this") {
     movieSearch(search.searchString)
 }
 else if (search.command === "do-what-it-says") {
-    fs.readFile('./utils/random.txt', function (err, data) {
+    fs.readFile('./utils/random.txt', 'utf-8', function (err, data) {
         if (err) {
             return log("Unable to run command", 'fail')
         }
-        searchSpotify(data.toString().split(',')[1])
+        searchSpotify(data.split(',')[1])
     })
 }
 else {
